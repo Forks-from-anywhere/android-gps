@@ -1,0 +1,8 @@
+body {
+	background: url("../images/Fondo.jpg") repeat-x scroll left top #FFF5DF;
+    color: #F2F2F2;
+    font-family: arial,helvetica,sans-serif;
+    font-size: 12px;
+    text-align: center;
+    margin: 10px;
+}

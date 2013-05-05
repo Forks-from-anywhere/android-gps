@@ -1,0 +1,80 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Red GPS</title>
+		<link href="css/main.css" type="text/css" rel="stylesheet">
+		<script type="text/javascript" charset="utf-8" src="cordova-2.7.0.js"></script>
+		<script type="text/javascript" charset="utf-8">
+	    document.addEventListener("deviceready", onDeviceReady, false);
+	    var timeSet = 0;
+	    var reporting = null;
+	    var onSuccessLocation = function(position) {
+    		alert('Latitude: '          + position.coords.latitude          + '\n' +
+          	'Longitude: '         + position.coords.longitude         + '\n' +
+          	'Altitude: '          + position.coords.altitude          + '\n' +
+          	'Accuracy: '          + position.coords.accuracy          + '\n' +
+          	'Altitude Accuracy: ' + position.coords.altitudeAccuracy  + '\n' +
+          	'Heading: '           + position.coords.heading           + '\n' +
+          	'Speed: '             + position.coords.speed             + '\n' +
+          	'Timestamp: '         + position.timestamp                + '\n');
+		};
+		
+	    function onDeviceReady() {
+	        var db = window.openDatabase("redgps_conf", "1.0", "BD de Configuracion RedGPS", 1000000);
+	        db.transaction(createDatabase, errorCB, successCB);	
+	        db.transaction(getTimeSetFromDb, errorCB, successCB);
+	    }
+	    function createDatabase(tx) {
+	    	tx.executeSql('CREATE TABLE IF NOT EXISTS CONFIG (key unique, value)');
+	    }
+	    
+	    function errorCB(err) {
+        	alert("Error processing SQL: "+err.code);
+	    }
+	   	
+	   	function successCB() {
+        	
+    	}
+    	
+    	function getTimeSetFromDb(tx) {
+        	tx.executeSql('SELECT * FROM CONFIG WHERE key = "TIME_SET"', [], queryTimeSetSuccess, errorCB);
+    	}
+    	
+    	function queryTimeSetSuccess(tx, results) {
+    		var len = results.rows.length;
+	        console.log("CONFIG table: " + len + " rows found.");
+	        if (len > 0) {
+	        	alert("Recuperando TimeSet");
+		        timeSet = parseInt(results.rows.item(0).value);
+	        } else {
+	        	alert("Guardando TimeSet");
+	        	tx.executeSql('INSERT INTO CONFIG(key, value) VALUES("TIME_SET", "5")');
+	        	timeSet = 5;
+	        }
+	        setReporting();
+    	}
+    	
+    	function setReporting() {
+    		if (reporting) {
+    			clearInterval(reporting);
+    		}
+    		var seconds = timeSet * 60000;
+    		alert("Seconds: " + seconds);
+    		reporting = setInterval(function(){
+    			navigator.geolocation.getCurrentPosition(onSuccessLocation, onErrorLocation);
+    		}, seconds);
+    	}
+    	
+    	function onErrorLocation(error) {
+		    alert('code: '    + error.code    + '\n' +
+		          'message: ' + error.message + '\n');
+		}
+    	
+	    </script> 
+	</head>
+	<body>
+	<header>
+		<img src="images/Logo_redgps.png" alt="Logo" />
+	</head>
+	</body>
+</html>
