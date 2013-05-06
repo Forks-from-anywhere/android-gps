@@ -4,8 +4,11 @@
 		<title>Red GPS</title>
 		<link href="css/main.css" type="text/css" rel="stylesheet">
 		<script type="text/javascript" charset="utf-8" src="cordova-2.7.0.js"></script>
+		<script type="text/javascript" charset="utf-8" src="backgroundService-2.5.0.js"></script>
+		<script type="text/javascript" charset="utf-8" src="locationService.js"></script>
 		<script type="text/javascript" charset="utf-8">
 	    document.addEventListener("deviceready", onDeviceReady, false);
+	    var locationService = cordova.require('cordova/plugin/locationService');
 	    var timeSet = 0;
 	    var reporting = null;
 	    var onSuccessLocation = function(position) {
@@ -23,7 +26,9 @@
 	        var db = window.openDatabase("redgps_conf", "1.0", "BD de Configuracion RedGPS", 1000000);
 	        db.transaction(createDatabase, errorCB, successCB);	
 	        db.transaction(getTimeSetFromDb, errorCB, successCB);
+	        getStatus();
 	    }
+	    
 	    function createDatabase(tx) {
 	    	tx.executeSql('CREATE TABLE IF NOT EXISTS CONFIG (key unique, value)');
 	    }
@@ -51,7 +56,7 @@
 	        	tx.executeSql('INSERT INTO CONFIG(key, value) VALUES("TIME_SET", "5")');
 	        	timeSet = 5;
 	        }
-	        setReporting();
+	        //setReporting();
     	}
     	
     	function setReporting() {
@@ -70,11 +75,183 @@
 		          'message: ' + error.message + '\n');
 		}
     	
+    	function startService() {
+    			locationService.startService(	function(r){handleSuccess(r)},
+					function(e){handleError(e)});
+    	}
+    	
+    	function handleSuccess(data) {
+			updateView(data);
+		}
+    	
+    	function handleError(data) {
+			alert("Error: " + data.ErrorMessage);
+			alert(JSON.stringify(data));
+			updateView(data);
+		}
+		/*
+		* Button Handlers
+		*/
+		function getStatus() {
+			locationService.getStatus(function(r){ handleSuccess(r); },
+				function(e){handleError(e);});
+		};
+		 
+		function startService() {
+			locationService.startService(	function(r){handleSuccess(r)},
+				function(e){handleError(e)});
+		}
+		
+		function stopService() {
+			locationService.stopService(function(r){handleSuccess(r)},
+				function(e){handleError(e)});
+		}
+		
+		function enableTimer() {
+			alert("Setting timer");
+			locationService.enableTimer(timeSet * 60000,
+				function(r){handleSuccess(r)},
+				function(e){handleError(e)});
+		}
+		
+		
+		function disableTimer() {
+			locationService.disableTimer(function(r){handleSuccess(r)},
+				function(e){handleError(e)});
+		};
+		
+		function registerForBootStart() {
+			locationService.registerForBootStart(function(r){handleSuccess(r)},
+				function(e){handleError(e)});
+		}
+		
+		function deregisterForBootStart() {
+			locationService.deregisterForBootStart(function(r){handleSuccess(r)},
+				function(e){handleError(e)});
+		}
+		
+		function setConfig() {
+			var helloToTxt = document.getElementById("helloToTxt");
+			var helloToString = helloToTxt.value;
+		  	var config = {
+		  		"HelloTo" : helloToString
+		  	};
+			locationService.setConfiguration(config,
+				function(r){handleSuccess(r)},
+				function(e){handleError(e)});
+		}
+		
+		/*
+		* View logic
+		*/
+		function updateView(data) {
+			var serviceBtn = document.getElementById("toggleService");
+			var timerBtn = document.getElementById("toggleTimer");
+			var bootBtn = document.getElementById("toggleBoot");
+			var updateBtn = document.getElementById("updateBtn");
+			var refreshBtn = document.getElementById("refreshBtn");
+			
+			var serviceStatus = document.getElementById("serviceStatus");
+			var timerStatus = document.getElementById("timerStatus");
+			var bootStatus = document.getElementById("bootStatus");
+		
+			serviceBtn.disabled = false;
+			if (data.ServiceRunning) {
+				serviceStatus.innerHTML = "Running";
+				serviceBtn.onclick = stopService;
+				timerBtn.disabled = false;
+				if (data.TimerEnabled) {
+					timerStatus.innerHTML = "Enabled";
+					timerBtn.onclick = disableTimer;
+				} else {
+					timerStatus.innerHTML = "Disabled";
+					timerBtn.onclick = enableTimer;
+				}
+				updateBtn.disabled = false;
+				updateBtn.onclick = setConfig;
+		
+				refreshBtn.disabled = false;
+				refreshBtn.onclick = getStatus;
+			} else {
+				serviceStatus.innerHTML = "Not running";
+				serviceBtn.onclick = startService;
+				timerBtn.disabled = true;
+				timerEnabled = false;
+				
+				updateBtn.disabled = true;
+				refreshBtn.disabled = true;
+			}
+			bootBtn.disabled = false;
+			if (data.RegisteredForBootStart) {
+				bootStatus.innerHTML = "Registered";
+				bootBtn.onclick = deregisterForBootStart;
+			} else {
+				bootStatus.innerHTML = "Not registered";
+				bootBtn.onclick = registerForBootStart;
+			}
+			
+			if (data.Configuration != null)
+			{
+				try {
+					var helloToTxt = document.getElementById("helloToTxt");
+					helloToTxt.value = data.Configuration.HelloTo;
+				} catch (err) {}
+			}
+			if (data.LatestResult != null)
+			{
+				try {
+					var resultMessage = document.getElementById("resultMessage");
+					resultMessage.innerHTML = data.LatestResult.Message;
+				} catch (err) {}
+			}
+		}
 	    </script> 
 	</head>
 	<body>
 	<header>
 		<img src="images/Logo_redgps.png" alt="Logo" />
 	</head>
+	<content>
+		<table>
+			<tr>
+			<th>Service</th>
+			<td><div id="serviceStatus"></div></td>
+			<td><input id="toggleService" type="button" value="toggle"/></td>
+			</tr>
+			<tr>
+			<th>Timer</th>
+			<td><div id="timerStatus"></div></td>
+			<td><input id="toggleTimer" type="button" value="toggle"/></td>
+			</tr>
+			<tr>
+			<th>Boot</th>
+			<td><div id="bootStatus"></div></td>
+			<td><input id="toggleBoot" type="button" value="toggle"/></td>
+			</tr>
+			
+			<tr>
+			<th colspan=3 align="center">Configuration</th>
+			</tr>
+			<tr>
+			<th align="left">Hello To</th>
+			<td colspan=2 align="center"><input id="helloToTxt" type="Text"/></td>
+			</tr>
+			<tr>
+			<td colspan=3 align="center"><input disabled id="updateBtn" type="button" value="Update Config"/></td>
+			</tr>
+			
+			<tr>
+			<th colspan=3 align="center">Latest Result</th>
+			</tr>
+			
+			<tr>
+			<td colspan=3 align="center"><div id="resultMessage"></div></td>
+			</tr>
+			
+			<tr>
+			<td colspan=3 align="center"><input disabled id="refreshBtn" type="button" value="Refresh"/></td>
+			</tr>
+		</table>
+	</content>
 	</body>
 </html>
