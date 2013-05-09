@@ -11,6 +11,7 @@
 	    var locationService = cordova.require('cordova/plugin/locationService');
 	    var timeSet = 0;
 	    var reporting = null;
+	    var db = null;
 	    var onSuccessLocation = function(position) {
     		alert('Latitude: '          + position.coords.latitude          + '\n' +
           	'Longitude: '         + position.coords.longitude         + '\n' +
@@ -23,7 +24,7 @@
 		};
 		
 	    function onDeviceReady() {
-	        var db = window.openDatabase("redgps_conf", "1.0", "BD de Configuracion RedGPS", 1000000);
+	        db = window.openDatabase("redgps_conf", "1.0", "BD de Configuracion RedGPS", 1000000);
 	        db.transaction(createDatabase, errorCB, successCB);	
 	        db.transaction(getTimeSetFromDb, errorCB, successCB);
 	        getStatus();
@@ -109,6 +110,16 @@
 		
 		function enableTimer() {
 			alert("Setting timer");
+			var newTimeSet = 0;
+			try {
+				newTimeSet = parseInt(document.getElementById('txtTimer').value);
+			} catch(err) {
+				alert("The time set value is not valid");
+			}
+			if (newTimeSet != timeSet) {
+				timeSet = newTimeSet;
+				db.executeSql('UPDATE CONFIG SET value = "' + timeSet + '" WHERE key = "TIME_SET"');
+			}
 			locationService.enableTimer(timeSet * 60000,
 				function(r){handleSuccess(r)},
 				function(e){handleError(e)});
@@ -147,25 +158,23 @@
 		function updateView(data) {
 			var serviceBtn = document.getElementById("toggleService");
 			var timerBtn = document.getElementById("toggleTimer");
+			var txtTimer = document.getElementById("txtTimer");
 			var bootBtn = document.getElementById("toggleBoot");
 			var updateBtn = document.getElementById("updateBtn");
 			var refreshBtn = document.getElementById("refreshBtn");
 			
-			var serviceStatus = document.getElementById("serviceStatus");
-			var timerStatus = document.getElementById("timerStatus");
-			var bootStatus = document.getElementById("bootStatus");
-		
+			txtTimer.value = timeSet;
 			serviceBtn.disabled = false;
 			if (data.ServiceRunning) {
-				serviceStatus.innerHTML = "Running";
+				serviceBtn.value = "Running";
 				serviceBtn.onclick = stopService;
 				timerBtn.disabled = false;
 				if (data.TimerEnabled) {
-					timerStatus.innerHTML = "Enabled";
 					timerBtn.onclick = disableTimer;
+					timerBtn.value = "Enabled";
 				} else {
-					timerStatus.innerHTML = "Disabled";
 					timerBtn.onclick = enableTimer;
+					timerBtn.value = "Disabled";
 				}
 				updateBtn.disabled = false;
 				updateBtn.onclick = setConfig;
@@ -173,8 +182,8 @@
 				refreshBtn.disabled = false;
 				refreshBtn.onclick = getStatus;
 			} else {
-				serviceStatus.innerHTML = "Not running";
 				serviceBtn.onclick = startService;
+				serviceBtn.value = "Not running";
 				timerBtn.disabled = true;
 				timerEnabled = false;
 				
@@ -183,20 +192,13 @@
 			}
 			bootBtn.disabled = false;
 			if (data.RegisteredForBootStart) {
-				bootStatus.innerHTML = "Registered";
 				bootBtn.onclick = deregisterForBootStart;
+				bootBtn.value = "Registered";
 			} else {
-				bootStatus.innerHTML = "Not registered";
 				bootBtn.onclick = registerForBootStart;
+				bootBtn.value = "Not registered";
 			}
 			
-			if (data.Configuration != null)
-			{
-				try {
-					var helloToTxt = document.getElementById("helloToTxt");
-					helloToTxt.value = data.Configuration.HelloTo;
-				} catch (err) {}
-			}
 			if (data.LatestResult != null)
 			{
 				try {
@@ -220,7 +222,8 @@
 			</tr>
 			<tr>
 			<th>Timer</th>
-			<td><div id="timerStatus"></div></td>
+			<td><input type="number" id="txtTimer" />(min)
+			<div id="timerStatus"></div></td>
 			<td><input id="toggleTimer" type="button" value="toggle"/></td>
 			</tr>
 			<tr>
@@ -232,10 +235,7 @@
 			<tr>
 			<th colspan=3 align="center">Configuration</th>
 			</tr>
-			<tr>
-			<th align="left">Hello To</th>
-			<td colspan=2 align="center"><input id="helloToTxt" type="Text"/></td>
-			</tr>
+			
 			<tr>
 			<td colspan=3 align="center"><input disabled id="updateBtn" type="button" value="Update Config"/></td>
 			</tr>

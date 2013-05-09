@@ -6,6 +6,11 @@ import java.text.SimpleDateFormat;
 import org.json.JSONObject;
 import org.json.JSONException;
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Bundle;
 import android.util.Log;
 
 import com.red_folder.phonegap.plugin.backgroundservice.BackgroundService;
@@ -21,10 +26,27 @@ public class LocationService extends BackgroundService {
 		// TODO Auto-generated method stub
 		JSONObject result = new JSONObject();
 		try {
-			SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-			String now = df.format(new Date(System.currentTimeMillis()));
-
-			String msg = "Hello " + this.mHelloTo + " - its currently " + now;
+			/*LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+			MyLocationListener listener = new MyLocationListener();
+			lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, listener);*/
+			LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE); 
+			Location location = null;
+			boolean isNetworkEnabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+			boolean isGpsEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+			if(isNetworkEnabled) {
+				location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+			} else if(isGpsEnabled) {
+				location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+			}
+			String msg = "";
+			if (location != null) {
+				double longitude = location.getLongitude();
+				double latitude = location.getLatitude();
+				msg = "My location - longitude: " + Double.toString(longitude) +
+						" latitude: " + Double.toString(latitude);
+			} else {
+				msg = "No location found";
+			}
 			result.put("Message", msg);
 			Log.d(TAG, msg);
 		} catch (JSONException e) {}
@@ -48,5 +70,4 @@ public class LocationService extends BackgroundService {
 		// TODO Auto-generated method stub
 
 	}
-
 }
