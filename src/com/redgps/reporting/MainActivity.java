@@ -8,8 +8,9 @@ import android.os.Bundle;
 import android.util.Log;
 //import android.app.Activity;
 import android.view.Menu;
-import org.apache.cordova.DroidGap;
 import android.widget.Toast;
+
+import org.apache.cordova.DroidGap;
 
 public class MainActivity extends DroidGap {
 
@@ -22,11 +23,11 @@ public class MainActivity extends DroidGap {
 		MyLocationListener listener = new MyLocationListener();
 		boolean isNetworkEnabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 		boolean isGpsEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-		if(isNetworkEnabled) {
-			lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, listener);
-		} else if(isGpsEnabled) {
+		if(isGpsEnabled) {
 			lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, listener);
-		}
+		} else if(isNetworkEnabled) {
+			lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, listener);
+		} 
 	}
 
 	@Override
@@ -67,4 +68,5 @@ public class MainActivity extends DroidGap {
 		}
 		
 	}
+
 }
