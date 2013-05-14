@@ -1,0 +1,229 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RedGps Mobile</title>
+    <link href="./css/bootstrap.css" rel="stylesheet">
+    <link href="./css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="./css/docs.css" rel="stylesheet">
+    <style>
+      body{
+        background-color: #FFD064;
+        max-width: 480px;
+      }
+      .ancho{
+        width: 100%;
+        margin-left: 1%;
+
+      }
+      .ancho .btn{
+        width: 24.5%;
+      }
+
+      #caja_status{
+        width: 100%;
+        padding: 10px 0px;
+        background-color: #FFD064;
+      }
+      #caja_config{
+        padding: 0px 0;
+        text-align: center;
+      }
+      
+      .botones_top{
+        float:right;
+        margin-left: 10px;
+      }
+      .caja_form{
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        background-color: #FFF;
+        padding: 10px 0;
+      }
+
+      #caja_help{
+        background-color: #FFD064;
+      }
+
+    select, textarea, input[type="text"], input[type="password"], input[type="datetime"], input[type="datetime-local"], input[type="date"], input[type="month"], input[type="time"], input[type="week"], input[type="number"], input[type="email"], input[type="url"], input[type="search"], input[type="tel"], input[type="color"], .uneditable-input{
+      height: 30px;
+      width: 250px;
+    }
+    </style>
+	<script type="text/javascript" charset="utf-8" src="cordova-2.7.0.js"></script>
+	<script type="text/javascript" charset="utf-8" src="backgroundService-2.5.0.js"></script>
+	<script type="text/javascript" charset="utf-8" src="locationService.js"></script>
+	<script type="text/javascript" charset="utf-8" src="./js/redgps.js"></script>
+    <script src="./js/jquery-1.9.1.min.js"></script>
+  </head>
+<body data-spy="scroll" data-target=".bs-docs-sidebar">
+<div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <div class="btn-group botones_top">
+            <a class="btn btn-inverse" id="btn_home"
+              href="#"><i class="icon-home icon-white"></i></a>
+            <a class="btn btn-inverse" id="btn_config"
+              href="#"><i class=" icon-tasks icon-white"></i></a>
+             <a class="btn btn-inverse" id="btn_help"
+              href="#"><i class="icon-question-sign icon-white"></i></a>
+          </div>
+         <a href="#" class="brand">RedGps mobile</a>        
+        </div>
+      </div>
+<div id="caja_help" class="paginas" style="display:none;">
+
+    <h3 style="text-align:center;">Ayuda RedGps mobile</h3>
+
+    <div id="inicio_redgps" class="well well-large">
+      <p>
+        Para poder utilizar este aplicacion deberá seguir los siguientes pasos.
+
+      </p><p>
+        1) Instalar la aplicacion en su celular
+       </p><p>
+        2) Solicitar a redgps.com que su equipo sea dado de alta en la platadorma. Para realizar esta acción deberá proporcionarnos el Nro de IMEI que aparece en la seccion de configuracion.
+       </p><p>
+        Para utiliar esta aplicación deberá configurar el servidor y luego el tiempo de reporte
+        luego de esto, usted podrá ya visualizar este equipo celular en la plataforma de 
+        www.redgps.com
+         
+    </div>
+
+</div>
+
+<div id="caja_config" class="paginas" style="display:none;">
+
+<h3>Menu de Configuración</h3>
+<div class="caja_form" class="well well-large msg_status">
+
+
+      <label>Nombre de Host</label>
+      <input type="text" class="input-large" id="txtServer" 
+        placeholder="Ej: rastreo.redgps.com">
+     
+      <label>Puerto UDP</label>
+      <input type="number" class="input-large" 
+        placeholder="Ej: 8008" id="txtPort" >
+
+      <label>Tiempo de reporte</label>
+         <select name="time_report" id="txtTimer">
+         	<option value="0" selected="selected">Deshabilitado</option>
+            <option value="1">Cada 1 minuto</option>
+            <option value="2">Cada 2 minutos</option>
+            <option value="5">Cada 5 minutos</option>
+            <option value="15">Cada 15 minutos</option>
+            <option value="30">Cada 30 minutos</option>
+            <option value="60">Cada 60 minutos</option>
+            <option value="120">Cada 120 minutos</option>
+          </select>
+
+      <label>Inicio automatico</label>
+         <select name="toggleBoot" id="toggleBoot">
+            <option value="1" selected="selected">S&iacute;</option>
+            <option value="0">No</option>
+          </select>
+ 
+
+      <label>Nro IMEI</label>
+      <input value="234234234234239487" type="text" class="input-large" name="imei" id="imei" disabled>
+     
+      
+
+     <p>
+      <button class="btn btn-primary" type="button" id="btn_guardar_conf">Guardar configuración</button>
+    </p>
+
+
+</div>
+
+</div>
+
+<div id="caja_status" class="paginas">
+
+    <div>
+
+        <div class="btn-group ancho">
+        <button id="iniciar" class="btn btn-success">Iniciar</button>
+        <button id="detener" class="btn btn-danger">Detener</button>
+        <button id="ocultar" class="btn">Ocultar</button>
+        <button id="apagar" class="btn btn-inverse">Apagar</button>
+        </div>
+
+    </div>
+
+      <div id="caja_status" class="">
+
+        <div style="display:none;" id="status_reportando" class="alert alert-success msg_status">
+        <b>Estado actual: </b>Servicio reportando correctamente
+        </div>
+
+        <div style="display:none;" id="status_detenido" class="alert alert-error msg_status">
+        <b>Estado actual: </b>El servicio se encuentra detenido
+        </div>
+
+        <div style="display:none;" id="status_conectando" class="alert alert-info msg_status">
+        <b>Estado actual: </b>Conectando con el servidor xxxx.xxxx.xxx.xx puerto 8008
+        </div>
+
+        <div style="display:none;" id="ultimo_reporte" class="well well-large msg_status">
+        </div>
+
+        <div id="inicio_redgps" class="well well-large msg_status">
+        <h3>Bienvenido a RedGps</h3>
+        Para utiliar esta aplicación deberá configurar el servidor y luego el tiempo de reporte
+        luego de esto, usted podrá ya visualizar este equipo celular en la plataforma de 
+        www.redgps.com
+         
+        </div>
+
+      </div>
+
+ </div>
+
+
+ </div>
+
+
+</body>
+    <script>
+      $('#iniciar').click( function(){
+      	  startService();
+          $('.msg_status').hide();
+          $('#status_reportando').show();
+          $('#ultimo_reporte').show();
+      });
+
+      $('#detener').click( function(){
+      	  stopService();
+          $('.msg_status').hide();
+          $('#status_detenido').show();
+      });
+
+      $('#btn_home').click( function(){
+          $('.paginas').hide();
+          $('#caja_status').show();
+      });
+
+      $('#btn_help').click( function(){
+          $('.paginas').hide();
+          $('#caja_help').show();
+      });
+
+      $('#btn_config').click( function(){
+         $('.paginas').hide();
+          $('#caja_config').show();
+      });
+      $('#btn_guardar_conf').click( function(){
+         setConfig();
+         enableTimer();
+      });
+      $('#ocultar').click( function() {
+      	 navigator.app.exitApp();
+      });
+      $('#apagar').click( function() {
+      	 stopService(true);
+      });
+    </script>
+</html>

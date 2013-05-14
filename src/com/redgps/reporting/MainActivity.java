@@ -18,7 +18,8 @@ public class MainActivity extends DroidGap {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//setContentView(R.layout.activity_main);
-		super.loadUrl("file:///android_asset/www/index.html");
+		super.setIntegerProperty("loadUrlTimeoutValue", 60000);
+		super.loadUrl("file:///android_asset/www/main.html");
 		LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 		MyLocationListener listener = new MyLocationListener();
 		boolean isNetworkEnabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
@@ -27,7 +28,7 @@ public class MainActivity extends DroidGap {
 			lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, listener);
 		} else if(isNetworkEnabled) {
 			lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, listener);
-		} 
+		}
 	}
 
 	@Override
@@ -46,7 +47,6 @@ public class MainActivity extends DroidGap {
 					Double.toString(arg0.getLongitude()) + " and latitude is: " +
 					Double.toString(arg0.getLatitude());
 			//Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
-			Log.d(LocationService.class.getSimpleName(), msg);
 		}
 
 		@Override
