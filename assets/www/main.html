@@ -170,12 +170,7 @@
         <div style="display:none;" id="ultimo_reporte" class="well well-large msg_status">
         </div>
 
-        <div id="inicio_redgps" class="well well-large msg_status">
-        <h3>Bienvenido a RedGps</h3>
-        Para utiliar esta aplicación deberá configurar el servidor y luego el tiempo de reporte
-        luego de esto, usted podrá ya visualizar este equipo celular en la plataforma de 
-        www.redgps.com
-         
+        <div id="inicio_redgps" class="well well-large msg_status" style="display: none !important">
         </div>
 
       </div>
@@ -190,15 +185,10 @@
     <script>
       $('#iniciar').click( function(){
       	  startService();
-          $('.msg_status').hide();
-          $('#status_reportando').show();
-          $('#ultimo_reporte').show();
       });
 
       $('#detener').click( function(){
       	  stopService();
-          $('.msg_status').hide();
-          $('#status_detenido').show();
       });
 
       $('#btn_home').click( function(){

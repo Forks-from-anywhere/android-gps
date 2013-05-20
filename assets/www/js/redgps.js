@@ -6,6 +6,7 @@ var db = null;
 var serverName = '';
 var serverPort = 0;
 var started = false;
+var running = false;
 var onSuccessLocation = function(position) {
 	alert('Latitude: '          + position.coords.latitude          + '\n' +
   	'Longitude: '         + position.coords.longitude         + '\n' +
@@ -67,7 +68,7 @@ function queryTimeSetSuccess(tx, results) {
     	tx.executeSql('INSERT INTO CONFIG(key, value) VALUES("TIME_SET", "5")');
     	timeSet = 5;
     }
-    //setReporting();
+    setReporting();
 }
 
 function setReporting() {
@@ -128,6 +129,7 @@ function enableTimer() {
 		timeSet = newTimeSet;
 		db.transaction(function(tx) {
 			tx.executeSql('UPDATE CONFIG SET value = "' + timeSet + '" WHERE key = "TIME_SET"');
+			setReporting();
 			}, errorCB, successCB);
 	} else if (newTimeSet <= 0) {
 		disableTimer();
@@ -142,6 +144,9 @@ function enableTimer() {
 function disableTimer() {
 	locationService.disableTimer(function(r){handleSuccess(r)},
 		function(e){handleError(e)});
+	if (reporting) {
+		clearInterval(reporting);
+	}
 };
 
 function registerForBootStart() {
@@ -234,7 +239,21 @@ function updateView(data) {
 			resultMessage.innerHTML = data.LatestResult.Message;
 		} catch (err) {}
 	}
-	
+	if (!running) {
+		alert("Bienvenido a RedGps\n" +
+        'Para utiliar esta aplicación deberá configurar el servidor y luego el tiempo de reporte ' +
+        'luego de esto, usted podrá ya visualizar este equipo celular en la plataforma de www.redgps.com');
+        running = true;
+	}
+	if(data.TimerEnabled && data.ServiceRunning) {
+		$('#status_reportando').show();
+        $('#ultimo_reporte').show();
+        $('#status_detenido').hide();
+	} else {
+		$('#status_detenido').show();
+        $('#status_reportando').hide();
+        $('#ultimo_reporte').hide();
+	}
 	document.getElementById('txtServer').value = serverName;
 	document.getElementById('txtPort').value = serverPort;
 }

@@ -101,6 +101,7 @@ public class LocationService extends BackgroundService {
 				msg = "No location found";
 			}
 			result.put("Message", msg);
+			Log.d(LocationService.TAG, msg);
 		} catch (JSONException e) {} catch (SocketException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
